@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary-blue: #29508b;
+    --primary-hover: #1e3d6b;
+    --soft-sky: #b4cce4;
+    --clinical-slate: #f8fafc;
+    --dark-navy: #0c162a;
+    --card-light: #ffffff;
+    --card-dark: #1e293b;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Tajawal', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--clinical-slate);
+    color: #1e293b;
+    direction: rtl;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .dark body {
+    background-color: var(--dark-navy);
+    color: #f1f5f9;
+  }
+}
+
+/* Luxury Soft Glassmorphism Utilities */
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-card-dark {
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+}
