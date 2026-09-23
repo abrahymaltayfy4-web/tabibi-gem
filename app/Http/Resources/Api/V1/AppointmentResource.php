@@ -14,7 +14,7 @@ class AppointmentResource extends JsonResource
             'uuid' => $this->uuid,
             'patient' => [
                 'id' => $this->patient?->id,
-                'name' => $this->patient?->first_name . ' ' . $this->patient?->last_name,
+                'name' => $this->patient?->first_name.' '.$this->patient?->last_name,
                 'phone' => $this->patient?->user?->phone,
             ],
             'doctor' => [

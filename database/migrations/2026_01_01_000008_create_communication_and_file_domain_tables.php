@@ -45,6 +45,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('conversation_id')->constrained('conversations')->onDelete('cascade');
             $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
+            $table->string('client_msg_id')->nullable()->index();
             $table->string('message_type')->default('text'); // MessageType enum
             $table->text('content')->nullable();
             $table->boolean('is_read')->default(false);

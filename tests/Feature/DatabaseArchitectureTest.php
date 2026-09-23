@@ -6,13 +6,13 @@ use App\Models\Appointment;
 use App\Models\AppointmentType;
 use App\Models\DoctorProfile;
 use App\Models\PatientProfile;
-use App\Models\Permission;
 use App\Models\Role;
 use App\Models\Specialty;
 use App\Models\User;
 use App\Shared\Enums\AccountStatus;
 use App\Shared\Enums\AppointmentStatus;
-use App\Shared\Enums\VerificationStatus;
+use Database\Seeders\AppointmentTypeSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -23,7 +23,7 @@ class DatabaseArchitectureTest extends TestCase
 
     public function test_roles_and_permissions_are_seeded_correctly(): void
     {
-        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
 
         $this->assertDatabaseHas('roles', ['name' => 'patient']);
         $this->assertDatabaseHas('roles', ['name' => 'doctor']);
@@ -55,7 +55,7 @@ class DatabaseArchitectureTest extends TestCase
 
     public function test_appointment_locking_and_price_snapshotting_preserves_financial_integrity(): void
     {
-        $this->seed(\Database\Seeders\AppointmentTypeSeeder::class);
+        $this->seed(AppointmentTypeSeeder::class);
 
         $patientUser = User::factory()->create();
         $patient = PatientProfile::factory()->create(['user_id' => $patientUser->id]);

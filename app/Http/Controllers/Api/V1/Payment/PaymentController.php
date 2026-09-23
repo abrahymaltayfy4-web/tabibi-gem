@@ -2,48 +2,84 @@
 
 namespace App\Http\Controllers\Api\V1\Payment;
 
-use App\Infrastructure\Adapters\Payment\SandboxedYERPaymentAdapter;
 use App\Http\Controllers\Controller;
-use App\Models\Appointment;
-use App\Shared\Support\ApiResponse;
+use App\Models\Invoice;
+use App\Services\PaymentTransactionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
-    use ApiResponse;
-
-    protected SandboxedYERPaymentAdapter $paymentGateway;
-
-    public function __construct(SandboxedYERPaymentAdapter $paymentGateway)
-    {
-        $this->paymentGateway = $paymentGateway;
-    }
+    public function __construct(
+        protected PaymentTransactionService $paymentService
+    ) {}
 
     public function checkout(int $appointmentId, Request $request): JsonResponse
     {
-        $appointment = Appointment::findOrFail($appointmentId);
+        $result = $this->paymentService->initiateCheckout($request->user(), $appointmentId);
 
-        $result = $this->paymentGateway->initiatePayment($appointment);
-
-        return $this->successResponse(
-            data: $result,
-            message: 'تم تفعيل عملية الدفع عبر محاكي الريال اليمني (Sandboxed YER)'
-        );
+        return response()->json([
+            'status' => 'success',
+            'message' => 'تم تفعيل عملية الدفع بالريال اليمني (Sandboxed YER)',
+            'data' => $result,
+        ]);
     }
 
-    public function callback(string $txRef, Request $request): JsonResponse
+    public function callback(string $txRef): JsonResponse
     {
-        $payment = $this->paymentGateway->verifyPayment($txRef, $request->all());
+        $payment = $this->paymentService->completePayment($txRef);
 
-        return $this->successResponse(
-            data: [
+        return response()->json([
+            'status' => 'success',
+            'message' => 'تم التحقق من نجاح الدفع بالريال اليمني وتأكيد الموعد Confirmed',
+            'data' => [
                 'payment_id' => $payment->id,
-                'status' => $payment->payment_status?->value ?? $payment->payment_status,
-                'appointment_status' => $payment->appointment?->status?->value ?? $payment->appointment?->status,
+                'status' => $payment->payment_status,
+                'appointment_status' => $payment->appointment?->status,
                 'amount_yer' => (float) $payment->amount,
+                'transaction_reference' => $payment->transaction_reference,
             ],
-            message: 'تم التحقق من نجاح الدفع بالريال اليمني وتأكيد الموعد Confirmed'
+        ]);
+    }
+
+    public function uploadManualProof(int $appointmentId, Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|max:10240', // 10MB
+            'reference_number' => 'required|string|max:100',
+        ]);
+
+        $payment = $this->paymentService->uploadManualProof(
+            $request->user(),
+            $appointmentId,
+            $request->file('file'),
+            $request->input('reference_number')
         );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'تم رفع إشعار التحويل اليدوي بنجاح وقيد المراجعة لدى المدقق المالي.',
+            'data' => [
+                'payment_id' => $payment->id,
+                'status' => $payment->payment_status,
+                'transaction_reference' => $payment->transaction_reference,
+            ],
+        ], 201);
+    }
+
+    public function invoice(int $invoiceId): JsonResponse
+    {
+        $invoice = Invoice::with(['patient.user', 'doctor.user', 'payment'])->findOrFail($invoiceId);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'invoice_number' => $invoice->invoice_number,
+                'total_amount_yer' => (float) $invoice->total_amount,
+                'patient_name' => $invoice->patient->user?->full_name,
+                'doctor_name' => $invoice->doctor->user?->full_name,
+                'issued_at' => $invoice->created_at->toIso8601String(),
+            ],
+        ]);
     }
 }

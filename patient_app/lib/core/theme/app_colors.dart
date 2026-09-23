@@ -32,5 +32,8 @@ class AppColors {
 
   // Dark Shimmer Gradient
   static const Color darkShimmerBase = Color(0xFF18243A);
-  static const Color darkShimmerHighlight = Color(0xFF2A3A55);
+  // Default / Legacy Aliases
+  static const Color primary = lightPrimary;
+  static const Color background = lightBackground;
 }
+

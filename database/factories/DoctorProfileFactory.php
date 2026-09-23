@@ -17,7 +17,7 @@ class DoctorProfileFactory extends Factory
         return [
             'user_id' => User::factory(),
             'primary_specialty_id' => Specialty::factory(),
-            'license_number' => 'YEM-LIC-' . $this->faker->unique()->numerify('#####'),
+            'license_number' => 'YEM-LIC-'.$this->faker->unique()->numerify('#####'),
             'verification_status' => VerificationStatus::APPROVED,
             'consultation_price' => 5000.00,
             'consultation_duration_minutes' => 30,

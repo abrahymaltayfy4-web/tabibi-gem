@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/security/secure_storage_service.dart';
@@ -12,6 +13,31 @@ class AuthCubit extends Cubit<AuthState> {
     required this.apiClient,
     required this.secureStorage,
   }) : super(AuthInitial());
+
+  String _extractErrorMessage(Object error, String fallbackMessage) {
+    if (error is DioException) {
+      if (error.response?.data != null && error.response?.data is Map) {
+        final data = error.response!.data as Map;
+        if (data.containsKey('errors') && data['errors'] is Map) {
+          final errors = data['errors'] as Map;
+          for (final value in errors.values) {
+            if (value is List && value.isNotEmpty) {
+              return value.first.toString();
+            }
+          }
+        }
+        if (data.containsKey('message') && data['message'] != null) {
+          return data['message'].toString();
+        }
+      }
+      if (error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.connectionError) {
+        return 'تعذر الاتصال بالخادم، يرجى التأكد من تشغيل الباك إند (php artisan serve)';
+      }
+    }
+    return fallbackMessage;
+  }
 
   Future<void> checkAuthStatus() async {
     emit(AuthLoading());
@@ -69,7 +95,7 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthFailureState(msg));
       }
     } catch (e) {
-      emit(const AuthFailureState('بيانات الدخول غير صحيحة أو خطأ في الاتصال بالحساب'));
+      emit(AuthFailureState(_extractErrorMessage(e, 'بيانات الدخول غير صحيحة أو خطأ في الاتصال')));
     }
   }
 
@@ -114,7 +140,7 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthFailureState(msg));
       }
     } catch (e) {
-      emit(const AuthFailureState('رقم الهاتف مسجل مسبقاً أو بيانات غير صالحة'));
+      emit(AuthFailureState(_extractErrorMessage(e, 'رقم الهاتف مسجل مسبقاً أو هناك خطأ في البيانات')));
     }
   }
 
@@ -126,3 +152,4 @@ class AuthCubit extends Cubit<AuthState> {
     emit(Unauthenticated());
   }
 }
+

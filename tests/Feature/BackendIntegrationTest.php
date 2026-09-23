@@ -5,11 +5,15 @@ namespace Tests\Feature;
 use App\Models\AppointmentType;
 use App\Models\DoctorProfile;
 use App\Models\PatientProfile;
+use App\Models\Role;
 use App\Models\Specialty;
 use App\Models\User;
 use App\Shared\Enums\AppointmentStatus;
 use App\Shared\Enums\PaymentStatus;
 use App\Shared\Enums\VerificationStatus;
+use Database\Seeders\AppointmentTypeSeeder;
+use Database\Seeders\RolePermissionSeeder;
+use Database\Seeders\SpecialtySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,9 +24,9 @@ class BackendIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
-        $this->seed(\Database\Seeders\SpecialtySeeder::class);
-        $this->seed(\Database\Seeders\AppointmentTypeSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
+        $this->seed(SpecialtySeeder::class);
+        $this->seed(AppointmentTypeSeeder::class);
     }
 
     public function test_public_can_discover_approved_doctors(): void
@@ -96,12 +100,12 @@ class BackendIntegrationTest extends TestCase
             ]);
 
         $callbackResponse->assertStatus(200)
-            ->assertJsonPath('data.status', 'Paid')
+            ->assertJsonPath('data.status', PaymentStatus::SUCCEEDED->value)
             ->assertJsonPath('data.appointment_status', 'Confirmed');
 
         $this->assertDatabaseHas('payments', [
             'transaction_reference' => $txRef,
-            'payment_status' => PaymentStatus::PAID->value,
+            'payment_status' => PaymentStatus::SUCCEEDED->value,
         ]);
 
         $this->assertDatabaseHas('appointments', [
@@ -118,7 +122,7 @@ class BackendIntegrationTest extends TestCase
     public function test_admin_can_approve_doctor_verification(): void
     {
         $adminUser = User::factory()->create();
-        $adminRole = \App\Models\Role::where('name', 'admin')->first();
+        $adminRole = Role::where('name', 'admin')->first();
         $adminUser->roles()->attach($adminRole->id);
 
         $doctorUser = User::factory()->create();

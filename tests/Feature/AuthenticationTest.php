@@ -3,7 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Specialty;
-
+use Database\Seeders\RolePermissionSeeder;
+use Database\Seeders\SpecialtySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,8 +15,8 @@ class AuthenticationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
-        $this->seed(\Database\Seeders\SpecialtySeeder::class);
+        $this->seed(RolePermissionSeeder::class);
+        $this->seed(SpecialtySeeder::class);
     }
 
     public function test_patient_can_register_successfully(): void
@@ -85,14 +86,14 @@ class AuthenticationTest extends TestCase
         $token = $loginResponse->json('data.token');
 
         // Access Me
-        $meResponse = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $meResponse = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/auth/me');
 
         $meResponse->assertStatus(200)
             ->assertJsonPath('data.full_name', 'علي صالح');
 
         // Logout
-        $logoutResponse = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $logoutResponse = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/auth/logout');
 
         $logoutResponse->assertStatus(200);

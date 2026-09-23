@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\DoctorProfileResource;
 use App\Models\DoctorProfile;
 use App\Models\DoctorVerificationRequest;
+use App\Services\AuditLoggerService;
 use App\Shared\Enums\VerificationStatus;
 use App\Shared\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -45,6 +46,15 @@ class AdminVerificationController extends Controller
             'reviewed_at' => now(),
         ]);
 
+        app(AuditLoggerService::class)->log(
+            $request->user(),
+            'DOCTOR_VERIFICATION_APPROVED',
+            DoctorProfile::class,
+            $doctor->id,
+            ['verification_status' => 'Pending'],
+            ['verification_status' => 'Approved']
+        );
+
         return $this->successResponse(
             data: new DoctorProfileResource($doctor->fresh(['user', 'primarySpecialty'])),
             message: 'تم اعتماد وتوثيق ترخيص الطبيب بنجاح'
@@ -69,6 +79,18 @@ class AdminVerificationController extends Controller
             'reviewed_by_admin_id' => $request->user()->id,
             'reviewed_at' => now(),
         ]);
+
+        app(AuditLoggerService::class)->log(
+            $request->user(),
+            'DOCTOR_VERIFICATION_REJECTED',
+            DoctorProfile::class,
+            $doctor->id,
+            ['verification_status' => 'Pending'],
+            [
+                'verification_status' => 'Rejected',
+                'rejection_reason' => $request->input('rejection_reason'),
+            ]
+        );
 
         return $this->successResponse(
             data: new DoctorProfileResource($doctor->fresh(['user', 'primarySpecialty'])),

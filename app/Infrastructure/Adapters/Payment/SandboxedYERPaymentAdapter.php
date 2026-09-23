@@ -17,7 +17,7 @@ class SandboxedYERPaymentAdapter implements PaymentGatewayInterface
 {
     public function initiatePayment(Appointment $appointment): array
     {
-        $txRef = 'YER-' . strtoupper(Str::random(10));
+        $txRef = 'YER-'.strtoupper(Str::random(10));
 
         $payment = Payment::create([
             'uuid' => (string) Str::uuid(),
@@ -34,7 +34,7 @@ class SandboxedYERPaymentAdapter implements PaymentGatewayInterface
             'payment_id' => $payment->id,
             'transaction_reference' => $txRef,
             'amount_yer' => (float) $payment->amount,
-            'checkout_url' => config('app.url') . '/api/v1/payments/sandbox-checkout/' . $txRef,
+            'checkout_url' => config('app.url').'/api/v1/payments/sandbox-checkout/'.$txRef,
         ];
     }
 
@@ -53,8 +53,8 @@ class SandboxedYERPaymentAdapter implements PaymentGatewayInterface
                 'payment_id' => $payment->id,
                 'gateway_name' => 'Sandbox_YER',
                 'request_payload_json' => $payload,
-                'response_payload_json' => ['status' => 'SUCCESS', 'gateway_ref' => 'SANDBOX-' . time()],
-                'gateway_transaction_id' => 'SANDBOX-' . time(),
+                'response_payload_json' => ['status' => 'SUCCESS', 'gateway_ref' => 'SANDBOX-'.time()],
+                'gateway_transaction_id' => 'SANDBOX-'.time(),
                 'status' => 'PAID',
             ]);
 
@@ -81,7 +81,7 @@ class SandboxedYERPaymentAdapter implements PaymentGatewayInterface
 
             // Generate Invoice
             Invoice::create([
-                'invoice_number' => 'INV-YER-' . time(),
+                'invoice_number' => 'INV-YER-'.time(),
                 'payment_id' => $payment->id,
                 'patient_id' => $appointment->patient_id,
                 'doctor_id' => $appointment->doctor_id,

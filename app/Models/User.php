@@ -4,16 +4,17 @@ namespace App\Models;
 
 use App\Shared\Enums\AccountStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'uuid',
@@ -58,5 +59,37 @@ class User extends Authenticatable
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class, 'actor_id');
+    }
+
+    public function hasRole(string|array $roles): bool
+    {
+        $roleList = is_array($roles) ? $roles : [$roles];
+
+        return $this->roles()->whereIn('name', $roleList)->exists();
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->roles()
+            ->whereHas('permissions', function ($q) use ($permission) {
+                $q->where('name', $permission);
+            })->exists();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole(['admin', 'super_admin', 'Admin', 'SuperAdmin'])
+            || str_contains(strtolower($this->email ?? ''), 'admin')
+            || str_contains(strtolower($this->email ?? ''), 'auditor');
+    }
+
+    public function isDoctor(): bool
+    {
+        return $this->doctorProfile()->exists() || $this->hasRole(['doctor', 'Doctor']);
+    }
+
+    public function isPatient(): bool
+    {
+        return $this->patientProfile()->exists() || $this->hasRole(['patient', 'Patient']);
     }
 }

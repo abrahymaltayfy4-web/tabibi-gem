@@ -11,14 +11,24 @@ interface AdminAuthState {
   hasPermission: (permission: PermissionKey) => boolean;
 }
 
+const getStoredAdmin = (): AdminUserEntity | null => {
+  try {
+    const item = localStorage.getItem('tabibi_admin_user');
+    return item ? JSON.parse(item) : null;
+  } catch {
+    return null;
+  }
+};
+
 export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
-  admin: null,
+  admin: getStoredAdmin(),
   token: localStorage.getItem('tabibi_admin_token'),
   isAuthenticated: !!localStorage.getItem('tabibi_admin_token'),
-  isLoading: true,
+  isLoading: false,
 
   setAdminAuth: (admin, token) => {
     localStorage.setItem('tabibi_admin_token', token);
+    if (admin) localStorage.setItem('tabibi_admin_user', JSON.stringify(admin));
     set({
       admin,
       token,
@@ -29,6 +39,7 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
 
   logoutAdmin: () => {
     localStorage.removeItem('tabibi_admin_token');
+    localStorage.removeItem('tabibi_admin_user');
     set({
       admin: null,
       token: null,
@@ -44,3 +55,4 @@ export const useAdminAuthStore = create<AdminAuthState>((set, get) => ({
     return admin.permissions?.includes(permission) || false;
   },
 }));
+

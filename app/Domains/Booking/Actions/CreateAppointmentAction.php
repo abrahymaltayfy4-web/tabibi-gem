@@ -22,7 +22,7 @@ class CreateAppointmentAction
 
             // 1. Fetch doctor profile and verify active clinic status
             $doctor = DoctorProfile::findOrFail($doctorId);
-            if (!$doctor->is_active_clinic) {
+            if (! $doctor->is_active_clinic) {
                 throw ValidationException::withMessages([
                     'doctor_id' => ['عيادة هذا الطبيب غير متاحة للحجز حالياً.'],
                 ]);

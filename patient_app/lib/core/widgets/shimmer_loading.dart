@@ -23,7 +23,7 @@ class ShimmerLoading extends StatelessWidget {
         : AppColors.lightShimmerBase;
 
     final highlightColor = isDark
-        ? AppColors.darkShimmerHighlight
+        ? AppColors.darkShimmerBase
         : AppColors.lightShimmerHighlight;
 
     return Shimmer.fromColors(

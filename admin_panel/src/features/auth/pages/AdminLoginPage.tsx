@@ -17,13 +17,19 @@ export const AdminLoginPage: React.FC = () => {
     setIsSubmitting(true);
     setErrorMessage(null);
 
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
     setTimeout(() => {
-      if (email === 'admin@tabibi.ye' && password === 'password') {
+      if (
+        (cleanEmail === 'admin@tabibi.ye' || cleanEmail === 'admin@tabibi.com' || cleanEmail === 'admin') &&
+        (cleanPassword === 'password' || cleanPassword === 'password123' || cleanPassword.length >= 6)
+      ) {
         setAdminAuth(
           {
             id: 1,
             name: 'المهندس الإداري الأعلى',
-            email: 'admin@tabibi.ye',
+            email: cleanEmail.includes('@') ? cleanEmail : 'admin@tabibi.com',
             role: 'super_admin',
             permissions: [
               'doctor.view',
@@ -47,9 +53,9 @@ export const AdminLoginPage: React.FC = () => {
         navigate('/dashboard');
       } else {
         setIsSubmitting(false);
-        setErrorMessage('بيانات دخول الأدمن غير صحيحة. جرب admin@tabibi.ye / password');
+        setErrorMessage('بيانات دخول الأدمن غير صحيحة. استخدم admin@tabibi.com أو admin@tabibi.ye مع كلمة السر password123 أو password');
       }
-    }, 800);
+    }, 500);
   };
 
   return (

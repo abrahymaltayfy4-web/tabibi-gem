@@ -21,7 +21,7 @@ class AppointmentController extends Controller
         CreateAppointmentAction $action
     ): JsonResponse {
         $patient = $request->user()->patientProfile;
-        if (!$patient) {
+        if (! $patient) {
             return $this->errorResponse('حسابك الحالي ليس حساب مريض.', Response::HTTP_FORBIDDEN);
         }
 
@@ -71,7 +71,7 @@ class AppointmentController extends Controller
         $isDoctorOwner = $user->doctorProfile && $user->doctorProfile->id === $appointment->doctor_id;
         $isAdmin = $user->roles()->whereIn('name', ['admin', 'super_admin'])->exists();
 
-        if (!$isPatientOwner && !$isDoctorOwner && !$isAdmin) {
+        if (! $isPatientOwner && ! $isDoctorOwner && ! $isAdmin) {
             return $this->forbiddenResponse('ليس لديك صلاحية الاطلاع على تفاصيل هذا الموعد.');
         }
 

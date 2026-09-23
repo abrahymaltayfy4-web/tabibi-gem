@@ -17,14 +17,19 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    // Simulate Sanctum Auth Request for Dev Scaffolding
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
     setTimeout(() => {
-      if (email === 'doctor@tabibi.ye' && password === 'password') {
+      if (
+        (cleanEmail === 'doctor@tabibi.ye' || cleanEmail === 'doctor@tabibi.com' || cleanEmail === 'doctor') &&
+        (cleanPassword === 'password' || cleanPassword === 'password123' || cleanPassword.length >= 6)
+      ) {
         setAuth(
           {
             id: 1,
-            name: 'د. أحمد علي البعداني',
-            email: 'doctor@tabibi.ye',
+            name: 'د. أحمد المحمدي',
+            email: cleanEmail.includes('@') ? cleanEmail : 'doctor@tabibi.com',
             role: 'doctor',
             createdAt: new Date().toISOString(),
           },
@@ -47,9 +52,9 @@ export const LoginPage: React.FC = () => {
         navigate('/dashboard');
       } else {
         setIsSubmitting(false);
-        setErrorMessage('البريد الإلكتروني أو كلمة المرور غير صحيحة. جرب doctor@tabibi.ye / password');
+        setErrorMessage('البريد الإلكتروني أو كلمة المرور غير صحيحة. استخدم doctor@tabibi.com أو doctor@tabibi.ye مع كلمة السر password123 أو password');
       }
-    }, 800);
+    }, 500);
   };
 
   return (

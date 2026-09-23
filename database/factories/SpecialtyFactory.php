@@ -11,10 +11,11 @@ class SpecialtyFactory extends Factory
 
     public function definition(): array
     {
-        $code = 'SPEC_' . strtoupper($this->faker->unique()->lexify('???'));
+        $code = 'SPEC_'.strtoupper($this->faker->unique()->lexify('???'));
+
         return [
-            'name_ar' => 'تخصص ' . $this->faker->word(),
-            'name_en' => 'Specialty ' . $this->faker->word(),
+            'name_ar' => 'تخصص '.$this->faker->word(),
+            'name_en' => 'Specialty '.$this->faker->word(),
             'code' => $code,
             'is_active' => true,
         ];
